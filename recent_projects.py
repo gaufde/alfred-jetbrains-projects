@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-
+import argparse
 import json
 import os
+import subprocess
 import sys
 from xml.etree import ElementTree
 
@@ -14,6 +15,7 @@ class AlfredItem:
         self.subtitle = subtitle
         self.arg = arg
         self.type = type
+        self.autocomplete = subtitle
 
 
 class AlfredOutput:
@@ -118,13 +120,31 @@ def filter_and_sort_projects(query, projects):
     results.sort(key=lambda p: p.sort_on_match_type(query))
     return results
 
-
-def main():  # pragma: nocover
+def is_process_running(app_name):
     try:
-        app_data = find_app_data(sys.argv[1])
-        recent_projects_file = find_recentprojects_file(app_data)
+        subprocess.check_output(['/usr/bin/pgrep', '-i', '-f', app_name])
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
-        query = sys.argv[2].strip().lower()
+def open_app(app_name, args=None):
+    try:
+        app_data = find_app_data(app_name)
+        bundle_id = app_data['bundle-id']
+
+        cmd = ['open', '-nb', bundle_id]
+
+        if args:
+            cmd.extend(['--args'] + list(args))
+        subprocess.run(cmd)
+    except subprocess.CalledProcessError:
+        print("Can't open {}".format(app_name))
+        exit(1)
+
+def list_projects(app_name, query):
+    try:
+        app_data = find_app_data(app_name)
+        recent_projects_file = find_recentprojects_file(app_data)
 
         projects = list(map(Project, read_projects_from_file(recent_projects_file)))
         projects = filter_and_sort_projects(query, projects)
@@ -134,11 +154,53 @@ def main():  # pragma: nocover
         print("No app specified, exiting")
         exit(1)
     except ValueError:
-        print("Can't find any preferences for", sys.argv[1])
+        print("Can't find any preferences for", app_name)
         exit(1)
     except FileNotFoundError:
-        print(f"The projects file for {sys.argv[1]} does not exist.")
+        print(f"The projects file for {app_name} does not exist.")
         exit(1)
+
+def main():  # pragma: nocover
+    parser = argparse.ArgumentParser(description='A script for working with recent projects in Jetbrains IDEs')
+    subparsers = parser.add_subparsers(dest='command', help=None, metavar='')
+
+    # Create parser for "ls" command
+    ls_parser = subparsers.add_parser('ls', help='List recent projects from IDE')
+    ls_parser.add_argument("app_name", help="The name of the application")
+    ls_parser.add_argument("query", help="The query from Alfred")
+
+    # Create parser for "rm" command
+    rm_parser = subparsers.add_parser('rm', help='Remove items')
+    rm_parser.add_argument('-a', '--all', action='store_true', help='Remove all items')
+    rm_parser.add_argument('app_name', help='The name of the application')
+    rm_parser.add_argument('file', nargs='+', help='File to remove')
+
+    open_parser = subparsers.add_parser('open', help='Open an app')
+    open_parser.add_argument('args', nargs='*', help='Optional arguments to pass when opening an app')
+
+    args = parser.parse_args()
+
+    if args.command == 'ls':
+        list_projects(args.app_name, args.query)
+    elif args.command == 'rm':
+        # The apps will write to recentProjects.xml on quitting, so we shouldn't modify that file if the app is open
+        need_to_quit = is_process_running(args.app_name)
+        if need_to_quit:
+            print(json.dumps({"items": [
+                {
+                    "type": "default",
+                    "title": "You must quit Pycharm first",
+                    "valid": False,
+                }
+            ]}))
+        else:
+            print("YAY")
+
+        # remove_items(args)
+    elif args.command == 'open':
+        open_app(args.app_name, args.args)
+    else:
+        parser.print_help()
 
 if __name__ == "__main__":  # pragma: nocover
     main()
