@@ -1,8 +1,9 @@
+import subprocess
 import unittest
 from unittest import mock
 
 from recent_projects import create_json, Project, find_app_data, find_recentprojects_file, read_projects_from_file, \
-    filter_and_sort_projects
+    filter_and_sort_projects, is_process_running
 
 
 class Unittests(unittest.TestCase):
@@ -120,6 +121,13 @@ class Unittests(unittest.TestCase):
         self.assertEqual(project.sort_on_match_type("spring-petclinic"), 1)
         self.assertEqual(project.sort_on_match_type("foobar"), 2)
 
+    @mock.patch("subprocess.check_output")
+    def test_is_process_running(self, mock_check_output):
+        mock_check_output.return_value = f"1234\n"
+        self.assertEqual(True, is_process_running("goland"))
+
+        mock_check_output.side_effect = subprocess.CalledProcessError(1, 'cmd')
+        self.assertEqual(False, is_process_running("goland"))
 
 if __name__ == '__main__':  # pragma: nocover
     unittest.main()
