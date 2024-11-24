@@ -5,7 +5,21 @@
 	<key>bundleid</key>
 	<string>com.github.artemy.jb_projects</string>
 	<key>connections</key>
-	<dict/>
+	<dict>
+	    <key>2A23DCF4-C92B-48F0-99E8-A560582B30B5</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>5CBC2BA5-8B9B-485B-A411-807D0C1111E6</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
 	<key>createdby</key>
 	<string>Artem Makarov</string>
 	<key>description</key>
@@ -24,7 +38,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>open -nb $bundle_id --args $@</string>
+				<string>eval "$@"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -39,6 +53,23 @@
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>'{query}', {variables}</string>
+				<key>cleardebuggertext</key>
+				<false/>
+				<key>processoutputs</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.debug</string>
+			<key>uid</key>
+			<string>5CBC2BA5-8B9B-485B-A411-807D0C1111E6</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
@@ -50,6 +81,13 @@
 			<real>470</real>
 			<key>ypos</key>
 			<real>480</real>
+		</dict>
+		<key>5CBC2BA5-8B9B-485B-A411-807D0C1111E6</key>
+		<dict>
+			<key>xpos</key>
+			<real>630</real>
+			<key>ypos</key>
+			<real>610</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>

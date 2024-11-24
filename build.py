@@ -3,21 +3,7 @@ import os
 import plistlib
 import re
 import sys
-from dataclasses import dataclass
-from typing import Optional
-
-
-@dataclass
-class Product:
-    keyword: str
-    uid: str
-    folder_name: str
-    bundle_id: str
-    display_name: Optional[str] = None
-    preferences_path: Optional[str] = None
-
-    def name(self) -> str:
-        return self.display_name if self.display_name else self.folder_name
+from recent_projects import Product
 
 
 def create_connection(destination_uid: str) -> list[dict]:
@@ -41,7 +27,7 @@ def create_script_filter(product: Product) -> dict:
                    'queuedelaymode': 0,
                    'queuemode': 1,
                    'runningsubtext': '',
-                   'script': f'python3 recent_projects.py {product.keyword} "{{query}}"',
+                   'script': f'python3 recent_projects.py ls {product.keyword} "{{query}}"',
                    'scriptargtype': 0,
                    'scriptfile': '',
                    'subtext': '',
@@ -71,10 +57,10 @@ def create_coordinates(xpos: int, ypos: int) -> dict[str, int]:
 
 def get_run_script_uid(plist) -> str:
     for obj in plist["objects"]:
-        if obj["config"]["script"] == 'open -nb $bundle_id --args $@' and obj["uid"] is not None:
+        if obj["config"]["script"] == 'eval "$@"' and obj["uid"] is not None:
             return obj["uid"]
     raise ValueError(
-        f"Could not find the script object with 'open -nb $bundle_id --args $@' as the script in the template")
+        f"Could not find the script object with 'eval \"$@\"' as the script in the template")
 
 
 def create_coordinate_ruler(size: int) -> list[int]:

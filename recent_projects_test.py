@@ -1,9 +1,10 @@
+import json
 import subprocess
 import unittest
 from unittest import mock
 
-from recent_projects import create_json, Project, find_app_data, find_recentprojects_file, read_projects_from_file, \
-    filter_and_sort_projects, is_process_running
+from recent_projects import create_json, Project, load_products, find_recentprojects_file, read_projects_from_file, \
+    filter_and_sort_projects, is_process_running, AlfredMod, CustomEncoder, AlfredItem, AlfredOutput
 
 
 class Unittests(unittest.TestCase):
@@ -39,22 +40,23 @@ class Unittests(unittest.TestCase):
                    '"type": "file"}]}'
         self.assertEqual(expected, create_json([Project("~/Documents/spring-petclinic")], "app_name"))
 
-    @mock.patch("builtins.open", mock.mock_open(read_data='{"clion": {"bundle_id": "com.jetbrains.clion", "folder_name": "CLion"}}'))
+    @mock.patch("builtins.open",
+                mock.mock_open(read_data='{"clion": {"bundle_id": "com.jetbrains.clion", "folder_name": "CLion"}}'))
     def test_read_app_data(self):
-        self.assertEqual(find_app_data("clion"), {
+        self.assertEqual(load_products("clion"), {
             "folder_name": "CLion",
             "bundle_id": "com.jetbrains.clion"
         })
 
         with self.assertRaises(SystemExit) as exitcode:
-            find_app_data("rider")
+            load_products("rider")
         self.assertEqual(exitcode.exception.code, 1)
 
     @mock.patch("builtins.open")
     def test_read_app_data_products_file_missing(self, mock_open):
         mock_open.side_effect = IOError()
         with self.assertRaises(SystemExit) as exitcode:
-            find_app_data("clion")
+            load_products("clion")
         self.assertEqual(exitcode.exception.code, 1)
 
     @mock.patch("os.path.expanduser")
@@ -129,5 +131,39 @@ class Unittests(unittest.TestCase):
         mock_check_output.side_effect = subprocess.CalledProcessError(1, 'cmd')
         self.assertEqual(False, is_process_running("goland"))
 
-if __name__ == '__main__':  # pragma: nocover
-    unittest.main()
+    def test_items_with_mods(self):
+        item1 = AlfredItem("Item 1", "item 1 subtitle", "item 1 arg")
+        item2 = AlfredItem("Item 2", "item 2 subtitle", "item 2 arg")
+
+        mod = AlfredMod("mod arg", "mod subtitle", False)
+
+        item2.add_mod("cmd+alt", mod)
+
+        test = AlfredOutput([item1, item2]).to_json()
+
+        expected = json.dumps({"items": [
+            {"title": "Item 1",
+             "subtitle": "item 1 subtitle",
+             "arg": "item 1 arg",
+             "type": "file",
+             "autocomplete": "item 1 subtitle",
+             },
+            {"title": "Item 2",
+             "subtitle": "item 2 subtitle",
+             "arg": "item 2 arg",
+             "type": "file",
+             "autocomplete": "item 2 subtitle",
+             "mods": {
+                 "cmd+alt": {
+                     "valid": False,
+                     "arg": "mod arg",
+                     "subtitle": "mod subtitle",
+                 }
+             }
+             },
+        ]})
+
+        self.assertEqual(expected, test)
+
+        if __name__ == '__main__':  # pragma: nocover
+            unittest.main()
