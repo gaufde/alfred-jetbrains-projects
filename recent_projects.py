@@ -3,35 +3,69 @@ import argparse
 import json
 import os
 import subprocess
-import sys
+from dataclasses import dataclass
+from typing import Optional
 from xml.etree import ElementTree
 
 BREAK_CHARACTERS = ["_", "-"]
 
 
+class AlfredMod:
+    def __init__(self, arg, subtitle, valid: bool = True):
+        self.valid = valid
+        self.arg = arg
+        self.subtitle = subtitle
+
+
+class AlfredVarsCollection:
+    def __init__(self):
+        self.variables = []
+
+    def add(self, key, value):
+        self.variables.append({key: value})
+
+
 class AlfredItem:
-    def __init__(self, title, subtitle, arg, type="file"):
+    def __init__(self, title, subtitle, arg, vars_collection: Optional[AlfredVarsCollection] = None,
+                 alfred_type="file"):
         self.title = title
         self.subtitle = subtitle
         self.arg = arg
-        self.type = type
+        self.type = alfred_type
         self.autocomplete = subtitle
+
+        if vars_collection is not None:
+            self.variables = vars_collection.variables
+
+    def add_mod(self, key_combination: str, action: AlfredMod):
+        if not hasattr(self, 'mods'):
+            # noinspection PyAttributeOutsideInit
+            self.mods = {}
+
+        self.mods[key_combination] = action
 
 
 class AlfredOutput:
-    def __init__(self, items, bundle_id):
-        self.variables = {"bundle_id": bundle_id}
+    def __init__(self, items, vars_collection: Optional[AlfredVarsCollection] = None):
+        if vars_collection is not None:
+            self.variables = vars_collection.variables
+
         self.items = items
+
+    def to_json(self):
+        return CustomEncoder().encode(self.__dict__)
 
 
 class CustomEncoder(json.JSONEncoder):
-    def default(self, obj):
-        return obj.__dict__
+    def default(self, o):
+        return o.__dict__
 
 
 def create_json(projects, bundle_id):
     return CustomEncoder().encode(
-        AlfredOutput([AlfredItem(project.name, project.path, project.path) for project in projects], bundle_id))
+        AlfredOutput(
+            [AlfredItem(project.name, project.path, f'open -nb {bundle_id} --args {project.path}') for project in
+             projects], bundle_id))
 
 
 class Project:
@@ -74,11 +108,27 @@ class Project:
         return 2
 
 
-def find_app_data(app):
+@dataclass
+class Product:
+    keyword: str
+    uid: str
+    folder_name: str
+    bundle_id: str
+    display_name: Optional[str] = None
+    preferences_path: str = "~/Library/Application Support/JetBrains/"
+
+    def name(self) -> str:
+        return self.display_name if self.display_name else self.folder_name
+
+
+def load_product(app):
     try:
         with open('products.json', 'r') as outfile:
             data = json.load(outfile)
-            return data[app]
+
+            product = Product(app, **data[app])
+            return product
+
     except IOError:
         print("Can't open products file")
     except KeyError:
@@ -86,20 +136,15 @@ def find_app_data(app):
     exit(1)
 
 
-def find_recentprojects_file(application):
-    preferences_path = os.path.expanduser(preferences_path_or_default(application))
+def find_recentprojects_file(application: Product):
+    preferences_path = os.path.expanduser(application.preferences_path)
     most_recent_preferences = max(find_preferences_folders(preferences_path, application))
     return "{}{}/options/{}.xml".format(preferences_path, most_recent_preferences, "recentProjects")
 
 
-def preferences_path_or_default(application):
-    return application["preferences_path"] if "preferences_path" in application \
-        else "~/Library/Application Support/JetBrains/"
-
-
-def find_preferences_folders(preferences_path, application):
+def find_preferences_folders(preferences_path, application: Product):
     return [folder_name for folder_name in next(os.walk(preferences_path))[1] if
-            application["folder_name"] in folder_name and not should_ignore_folder(folder_name)]
+            application.folder_name in folder_name and not should_ignore_folder(folder_name)]
 
 
 def should_ignore_folder(folder_name):
@@ -120,6 +165,7 @@ def filter_and_sort_projects(query, projects):
     results.sort(key=lambda p: p.sort_on_match_type(query))
     return results
 
+
 def is_process_running(app_name):
     try:
         subprocess.check_output(['/usr/bin/pgrep', '-i', '-f', app_name])
@@ -127,29 +173,32 @@ def is_process_running(app_name):
     except subprocess.CalledProcessError:
         return False
 
-def open_app(app_name, args=None):
-    try:
-        app_data = find_app_data(app_name)
-        bundle_id = app_data['bundle-id']
-
-        cmd = ['open', '-nb', bundle_id]
-
-        if args:
-            cmd.extend(['--args'] + list(args))
-        subprocess.run(cmd)
-    except subprocess.CalledProcessError:
-        print("Can't open {}".format(app_name))
-        exit(1)
 
 def list_projects(app_name, query):
     try:
-        app_data = find_app_data(app_name)
-        recent_projects_file = find_recentprojects_file(app_data)
+        app = load_product(app_name)
+        recent_projects_file = find_recentprojects_file(app)
 
         projects = list(map(Project, read_projects_from_file(recent_projects_file)))
         projects = filter_and_sort_projects(query, projects)
 
-        print(create_json(projects, app_data["bundle_id"]))
+        items = [AlfredItem(project.name, project.path, f'open -nb {app.bundle_id} --args {project.path}') for project
+                 in projects]
+
+        for item in items:
+            # TODO: this is slow, so I need a different method.
+            #  Either do it once and cache, or do it somewhere later in the user flow
+            if is_process_running(app_name):
+                remove_mod = AlfredMod("", f"Please quit {app.name()} to use the remove feature", False)
+            else:
+                script = f'python3 recent_projects.py rm {app.keyword} "$@"'
+                remove_mod = AlfredMod(script, "Remove from list (keep on hard drive)", True)
+
+            item.add_mod("cmd+shift", remove_mod)
+
+        output = AlfredOutput(items)
+
+        print(output.to_json())
     except IndexError:
         print("No app specified, exiting")
         exit(1)
@@ -159,6 +208,7 @@ def list_projects(app_name, query):
     except FileNotFoundError:
         print(f"The projects file for {app_name} does not exist.")
         exit(1)
+
 
 def main():  # pragma: nocover
     parser = argparse.ArgumentParser(description='A script for working with recent projects in Jetbrains IDEs')
@@ -175,9 +225,6 @@ def main():  # pragma: nocover
     rm_parser.add_argument('app_name', help='The name of the application')
     rm_parser.add_argument('file', nargs='+', help='File to remove')
 
-    open_parser = subparsers.add_parser('open', help='Open an app')
-    open_parser.add_argument('args', nargs='*', help='Optional arguments to pass when opening an app')
-
     args = parser.parse_args()
 
     if args.command == 'ls':
@@ -186,21 +233,13 @@ def main():  # pragma: nocover
         # The apps will write to recentProjects.xml on quitting, so we shouldn't modify that file if the app is open
         need_to_quit = is_process_running(args.app_name)
         if need_to_quit:
-            print(json.dumps({"items": [
-                {
-                    "type": "default",
-                    "title": "You must quit Pycharm first",
-                    "valid": False,
-                }
-            ]}))
+            print("You need to quit before removing.")
+            exit(1)
         else:
-            print("YAY")
-
-        # remove_items(args)
-    elif args.command == 'open':
-        open_app(args.app_name, args.args)
+            print("You can remove this item!")
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":  # pragma: nocover
     main()
