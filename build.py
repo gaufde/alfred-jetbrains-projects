@@ -32,7 +32,7 @@ def create_script_filter(product: Product) -> dict:
                    'scriptfile': '',
                    'subtext': '',
                    'skipuniversalaction': True,
-                   'title': f'Search through your recent {product.name()} projects',
+                   'title': f'Search through your recent {product.name} projects',
                    'type': 0,
                    'withspace': True},
         'type': 'alfred.workflow.input.scriptfilter',
@@ -45,8 +45,8 @@ def create_userconfigurationconfig(product: Product) -> dict:
                        'placeholder': product.keyword,
                        'required': False,
                        'trim': True},
-            'description': f'❗️Set a keyword to enable {product.name()}. Your setting will persist across workflow upgrades.',
-            'label': f'{product.name()} Keyword',
+            'description': f'❗️Set a keyword to enable {product.name}. Your setting will persist across workflow upgrades.',
+            'label': f'{product.name} Keyword',
             'type': 'textfield',
             'variable': product.keyword}
 
@@ -105,7 +105,7 @@ def build():
         plist["readme"] = content
 
     # Output
-    print(f"Building {[product.name() for product in products]}")
+    print(f"Building {[product.name for product in products]}")
     os.system(f'mkdir -p out')
 
     with open('out/info.plist', 'wb') as fp:

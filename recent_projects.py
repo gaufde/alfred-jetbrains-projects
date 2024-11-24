@@ -27,12 +27,18 @@ class AlfredVarsCollection:
 
 class AlfredItem:
     def __init__(self, title, subtitle, arg, vars_collection: Optional[AlfredVarsCollection] = None,
-                 alfred_type="file"):
+                 alfred_type="default"):
         self.title = title
         self.subtitle = subtitle
         self.arg = arg
         self.type = alfred_type
         self.autocomplete = subtitle
+        self.action = {
+            "text": ["one", "two", "three"],
+            "url": "https://www.alfredapp.com",
+            "file": "~/Desktop",
+            "auto": "~/Pictures"
+        }
 
         if vars_collection is not None:
             self.variables = vars_collection.variables
@@ -59,13 +65,6 @@ class AlfredOutput:
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
         return o.__dict__
-
-
-def create_json(projects, bundle_id):
-    return CustomEncoder().encode(
-        AlfredOutput(
-            [AlfredItem(project.name, project.path, f'open -nb {bundle_id} --args {project.path}') for project in
-             projects], bundle_id))
 
 
 class Project:
@@ -117,22 +116,23 @@ class Product:
     display_name: Optional[str] = None
     preferences_path: str = "~/Library/Application Support/JetBrains/"
 
+    @property
     def name(self) -> str:
         return self.display_name if self.display_name else self.folder_name
 
 
-def load_product(app):
+def load_product(keyword):
     try:
         with open('products.json', 'r') as outfile:
             data = json.load(outfile)
 
-            product = Product(app, **data[app])
+            product = Product(keyword, **data[keyword])
             return product
 
     except IOError:
         print("Can't open products file")
     except KeyError:
-        print("App '{}' is not found in the products.json".format(app))
+        print("App '{}' is not found in the products.json".format(keyword))
     exit(1)
 
 
@@ -174,12 +174,12 @@ def is_process_running(app_name):
         return False
 
 
-def list_projects(app_name, query):
+def list_projects(app_keyword, query):
     try:
-        app = load_product(app_name)
+        app = load_product(app_keyword)
         recent_projects_file = find_recentprojects_file(app)
 
-        projects = list(map(Project, read_projects_from_file(recent_projects_file)))
+        projects = get_projects(recent_projects_file)
         projects = filter_and_sort_projects(query, projects)
 
         items = [AlfredItem(project.name, project.path, f'open -nb {app.bundle_id} --args {project.path}') for project
@@ -188,8 +188,8 @@ def list_projects(app_name, query):
         for item in items:
             # TODO: this is slow, so I need a different method.
             #  Either do it once and cache, or do it somewhere later in the user flow
-            if is_process_running(app_name):
-                remove_mod = AlfredMod("", f"Please quit {app.name()} to use the remove feature", False)
+            if is_process_running(app_keyword):
+                remove_mod = AlfredMod("", f"Please quit {app.name} to use the remove feature", False)
             else:
                 script = f'python3 recent_projects.py rm {app.keyword} "$@"'
                 remove_mod = AlfredMod(script, "Remove from list (keep on hard drive)", True)
@@ -203,11 +203,15 @@ def list_projects(app_name, query):
         print("No app specified, exiting")
         exit(1)
     except ValueError:
-        print("Can't find any preferences for", app_name)
+        print("Can't find any preferences for", app_keyword)
         exit(1)
     except FileNotFoundError:
-        print(f"The projects file for {app_name} does not exist.")
+        print(f"The projects file for {app_keyword} does not exist.")
         exit(1)
+
+
+def get_projects(recent_projects_file):
+    return list(map(Project, read_projects_from_file(recent_projects_file)))
 
 
 def main():  # pragma: nocover
@@ -216,22 +220,22 @@ def main():  # pragma: nocover
 
     # Create parser for "ls" command
     ls_parser = subparsers.add_parser('ls', help='List recent projects from IDE')
-    ls_parser.add_argument("app_name", help="The name of the application")
+    ls_parser.add_argument("app_keyword", help="The name of the application")
     ls_parser.add_argument("query", help="The query from Alfred")
 
     # Create parser for "rm" command
     rm_parser = subparsers.add_parser('rm', help='Remove items')
     rm_parser.add_argument('-a', '--all', action='store_true', help='Remove all items')
-    rm_parser.add_argument('app_name', help='The name of the application')
+    rm_parser.add_argument('app_keyword', help='The name of the application')
     rm_parser.add_argument('file', nargs='+', help='File to remove')
 
     args = parser.parse_args()
 
     if args.command == 'ls':
-        list_projects(args.app_name, args.query)
+        list_projects(args.app_keyword, args.query)
     elif args.command == 'rm':
         # The apps will write to recentProjects.xml on quitting, so we shouldn't modify that file if the app is open
-        need_to_quit = is_process_running(args.app_name)
+        need_to_quit = is_process_running(args.app_keyword)
         if need_to_quit:
             print("You need to quit before removing.")
             exit(1)

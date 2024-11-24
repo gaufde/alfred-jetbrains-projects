@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from unittest import mock
 
-from recent_projects import create_json, Project, load_products, find_recentprojects_file, read_projects_from_file, \
+from recent_projects import Project, find_recentprojects_file, read_projects_from_file, \
     filter_and_sort_projects, is_process_running, AlfredMod, CustomEncoder, AlfredItem, AlfredOutput
 
 
@@ -18,14 +18,18 @@ class Unittests(unittest.TestCase):
             self.example_project = Project(self.example_projects_paths[0])
 
     @mock.patch('os.path.isfile')
-    def test_create_json(self, mock_isfile):
+    def test_get_project(self, mock_isfile):
         mock_isfile.return_value = False
+
+        test = CustomEncoder().encode(self.example_project)
+
         expected = '{"variables": {"bundle_id": "app_name"}, ' \
                    '"items": [{"title": "spring-petclinic", ' \
                    '"subtitle": "~/Documents/spring-petclinic", ' \
                    '"arg": "~/Documents/spring-petclinic", ' \
                    '"type": "file"}]}'
-        self.assertEqual(expected, create_json([self.example_project], "app_name"))
+
+        self.assertEqual(expected, test)
 
     @mock.patch("os.path.expanduser")
     @mock.patch('os.path.isfile')
