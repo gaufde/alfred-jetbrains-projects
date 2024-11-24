@@ -6,11 +6,86 @@
 	<string>com.github.artemy.jb_projects</string>
 	<key>connections</key>
 	<dict>
-	    <key>2A23DCF4-C92B-48F0-99E8-A560582B30B5</key>
+		<key>2A23DCF4-C92B-48F0-99E8-A560582B30B5</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
 				<string>5CBC2BA5-8B9B-485B-A411-807D0C1111E6</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>85F05EED-52E7-4C02-8B69-80D5AFC24C4D</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>EC598835-15E4-4681-B9E0-4BA02CB4E3D0</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>58455C74-6965-4937-9EFE-16FFEF13E21F</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>EC598835-15E4-4681-B9E0-4BA02CB4E3D0</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>60C02635-04FB-4711-9D1A-C99C87E18360</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>2A23DCF4-C92B-48F0-99E8-A560582B30B5</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>EC598835-15E4-4681-B9E0-4BA02CB4E3D0</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>F8DC0CE8-AB25-4873-9FD3-A90DB3B6EBDD</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>F8DC0CE8-AB25-4873-9FD3-A90DB3B6EBDD</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>F7DBA69C-DE30-44F2-9D07-8C9734D41213</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>58455C74-6965-4937-9EFE-16FFEF13E21F</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>0685242D-F900-4C24-867E-88AAC6D7D35E</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -33,12 +108,145 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>tasksettings</key>
+				<dict/>
+				<key>taskuid</key>
+				<string>com.alfredapp.automation.core/files-and-folders/path.trash</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.automation.task</string>
+			<key>uid</key>
+			<string>F7DBA69C-DE30-44F2-9D07-8C9734D41213</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>concurrently</key>
 				<false/>
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>eval "$@"</string>
+				<string>python3 recent_projects.py rm $app_keyword $@</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>EC598835-15E4-4681-B9E0-4BA02CB4E3D0</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string>{var:delete_from_disk}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>5</integer>
+						<key>matchstring</key>
+						<string></string>
+						<key>outputlabel</key>
+						<string>delete from disk</string>
+						<key>uid</key>
+						<string>58455C74-6965-4937-9EFE-16FFEF13E21F</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>else</string>
+				<key>hideelse</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>F8DC0CE8-AB25-4873-9FD3-A90DB3B6EBDD</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string>{var:delete_from_disk}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>5</integer>
+						<key>matchstring</key>
+						<string></string>
+						<key>outputlabel</key>
+						<string>delete from disk</string>
+						<key>uid</key>
+						<string>58455C74-6965-4937-9EFE-16FFEF13E21F</string>
+					</dict>
+					<dict>
+						<key>inputstring</key>
+						<string>{var:remove_from_list}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>5</integer>
+						<key>matchstring</key>
+						<string></string>
+						<key>outputlabel</key>
+						<string>remove from list</string>
+						<key>uid</key>
+						<string>60C02635-04FB-4711-9D1A-C99C87E18360</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>else</string>
+				<key>hideelse</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>85F05EED-52E7-4C02-8B69-80D5AFC24C4D</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>'{query}', {variables}</string>
+				<key>cleardebuggertext</key>
+				<false/>
+				<key>processoutputs</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.debug</string>
+			<key>uid</key>
+			<string>0685242D-F900-4C24-867E-88AAC6D7D35E</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>python3 recent_projects.py open $app_keyword $@</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -72,28 +280,366 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string># Recent JetBrains Projects for Alfred
+
+![test &amp; release](https://github.com/artemy/alfred-jetbrains-projects/workflows/test%20&amp;%20release/badge.svg)
+![MIT License](https://img.shields.io/github/license/artemy/alfred-jetbrains-projects)
+
+An Alfred workflow for opening your JetBrains IDEs projects
+
+![image](screenshot.png)
+
+## Getting started
+
+### Prerequisites
+
+Project requires Python 3.9+ to run, which is not included by default with macOS. You can install Python 3 using
+this [guide](https://docs.python-guide.org/starting/install3/osx/).
+
+### Installing
+
+Download the `alfred-jetbrains-projects.alfredworkflow` file from the latest release
+at [Releases](https://github.com/artemy/alfred-jetbrains-projects/releases) page and open it with Alfred.
+
+#### ⚠️ Set a keyword for every IDE you use  ⚠️
+
+By default, each IDE is inactive. Setting a keywords activates an IDE:
+![img.png](img.png)
+
+## How to Use
+
+Open Alfred and type keyword for your IDE (see Supported IDEs below). The workflow will display a list of recent projects (
+sorted by time last opened descending).
+
+You can further filter project list by typing additional words. Fuzzy first-letter search is supported (i.e.
+typing `map` will find `my-awesome-project`):
+
+![animation](animation.gif)
+
+### Supported IDEs
+
+IDE — Name — Version — Keyword
+- Android Studio — 4.1+ — androidstudio
+- AppCode — 2020.3+ — appcode
+- CLion — 2020.3+ — clion
+- DataGrip — 2020.3+ — datagrip
+- GoLand — 2020.3+ — goland
+- IntelliJ — IDEA — 2020.3+ — idea
+- PhpStorm — 2024.3+ — phpstorm
+- PyCharm — 2020.3+ — pycharm
+- RustRover — 2024.1+ — rustrover
+- WebStorm — 2020.3+ — webstorm
+
+Support for older IDE versions is not guaranteed.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+### Running the tests
+
+Make sure to first install test dependencies:
+
+```shell
+pip3 install -r requirements.txt
+```
+
+To run tests, execute
+
+```shell
+python3 -m recent_projects_test
+```
+
+If you want to get coverage figures through `coverage` tool:
+
+```shell
+coverage run -m unittest recent_projects_test # gather test data
+coverage report -m # display coverage figures
+```
+
+## Built With
+
+* [Python 3.9](https://docs.python.org/3.9/)
+* [coverage.py](https://coverage.readthedocs.io/) - Code coverage measurement
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md)
+and [contributors](https://github.com/artemy/alfred-jetbrains-projects/contributors) for the list of contributors.
+</string>
 	<key>uidata</key>
 	<dict>
+		<key>0685242D-F900-4C24-867E-88AAC6D7D35E</key>
+		<dict>
+			<key>xpos</key>
+			<real>855</real>
+			<key>ypos</key>
+			<real>810</real>
+		</dict>
 		<key>2A23DCF4-C92B-48F0-99E8-A560582B30B5</key>
 		<dict>
 			<key>xpos</key>
-			<real>470</real>
+			<real>520</real>
 			<key>ypos</key>
-			<real>480</real>
+			<real>830</real>
 		</dict>
 		<key>5CBC2BA5-8B9B-485B-A411-807D0C1111E6</key>
 		<dict>
 			<key>xpos</key>
-			<real>630</real>
+			<real>685</real>
 			<key>ypos</key>
-			<real>610</real>
+			<real>860</real>
+		</dict>
+		<key>85F05EED-52E7-4C02-8B69-80D5AFC24C4D</key>
+		<dict>
+			<key>note</key>
+			<string>Main connection</string>
+			<key>xpos</key>
+			<real>360</real>
+			<key>ypos</key>
+			<real>765</real>
+		</dict>
+		<key>EC598835-15E4-4681-B9E0-4BA02CB4E3D0</key>
+		<dict>
+			<key>xpos</key>
+			<real>520</real>
+			<key>ypos</key>
+			<real>700</real>
+		</dict>
+		<key>F7DBA69C-DE30-44F2-9D07-8C9734D41213</key>
+		<dict>
+			<key>xpos</key>
+			<real>850</real>
+			<key>ypos</key>
+			<real>690</real>
+		</dict>
+		<key>F8DC0CE8-AB25-4873-9FD3-A90DB3B6EBDD</key>
+		<dict>
+			<key>xpos</key>
+			<real>685</real>
+			<key>ypos</key>
+			<real>730</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
-	<array/>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>androidstudio</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable Android Studio. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>Android Studio Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>androidstudio</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>appcode</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable AppCode. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>AppCode Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>appcode</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>clion</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable CLion. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>CLion Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>clion</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>datagrip</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable DataGrip. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>DataGrip Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>datagrip</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>goland</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable GoLand. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>GoLand Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>goland</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>idea</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable IntelliJIdea. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>IntelliJIdea Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>idea</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>phpstorm</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable PhpStorm. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>PhpStorm Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>phpstorm</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>pycharm</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable PyCharm. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>PyCharm Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>pycharm</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>rustrover</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable RustRover. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>RustRover Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>rustrover</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>webstorm</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>❗️Set a keyword to enable WebStorm. Your setting will persist across workflow upgrades.</string>
+			<key>label</key>
+			<string>WebStorm Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>webstorm</string>
+		</dict>
+	</array>
 	<key>version</key>
-	<string>3.0</string>
+	<string>6.4</string>
 	<key>webaddress</key>
 	<string>https://github.com/artemy/alfred-jetbrains-projects</string>
 </dict>

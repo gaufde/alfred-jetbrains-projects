@@ -55,12 +55,14 @@ def create_coordinates(xpos: int, ypos: int) -> dict[str, int]:
     return {'xpos': xpos, 'ypos': ypos}
 
 
-def get_run_script_uid(plist) -> str:
-    for obj in plist["objects"]:
-        if obj["config"]["script"] == 'eval "$@"' and obj["uid"] is not None:
-            return obj["uid"]
+def get_connection_uid(plist: dict) -> str:
+    test = plist["uidata"]
+    for key, item in plist["uidata"].items():
+        if "note" in item and item["note"] == "Main connection":
+            return key
+
     raise ValueError(
-        f"Could not find the script object with 'eval \"$@\"' as the script in the template")
+        f"Could not find the script object with the note 'Main connection'")
 
 
 def create_coordinate_ruler(size: int) -> list[int]:
@@ -79,17 +81,23 @@ def build():
     version = sys.argv[1] if len(sys.argv) > 1 else "unknown"
 
     # Modify plist
-    # Get the UID of the runscript action in the template
-    run_script_uid = get_run_script_uid(plist)
-    run_script_connection = create_connection(run_script_uid)
+    # Get the UID of the item everything will connect to
+    connection_uid = get_connection_uid(plist)
+
+    # adjust height of existing UI elements
+    y_coordinate_ruler = create_coordinate_ruler(len(products))
+    offset_for_existing_objects = sum(y_coordinate_ruler) / len(y_coordinate_ruler) - plist["uidata"][connection_uid][
+        "ypos"]
+    for _, item in plist["uidata"].items():
+        item["ypos"] += offset_for_existing_objects
+
+
+    run_script_connection = create_connection(connection_uid)
 
     plist["connections"].update({product.uid: run_script_connection for product in products})
 
-    y_coordinate_ruler = create_coordinate_ruler(len(products))
     plist["uidata"].update(
         {product.uid: create_coordinates(30, coord) for product, coord in zip(products, y_coordinate_ruler)})
-
-    plist["uidata"][run_script_uid]["ypos"] = sum(y_coordinate_ruler) / len(y_coordinate_ruler)
 
     plist["objects"].extend([create_script_filter(product) for product in products])
 
